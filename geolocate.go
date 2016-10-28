@@ -7,13 +7,11 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-
-	"github.com/kellydunn/golang-geo"
 )
 
 // Geolocate returns a rough location based on your IP
-func Geolocate(apiKey string) (*geo.Point, error) {
-	data, err := request(apiKey)
+func (g *GoogleGeo) Geolocate() (*Point, error) {
+	data, err := g.geolocateRequest()
 	if err != nil {
 		return nil, err
 	}
@@ -25,8 +23,7 @@ func Geolocate(apiKey string) (*geo.Point, error) {
 		return nil, fmt.Errorf(e.Domain + "." + e.Reason + "." + e.Message)
 	}
 
-	point := geo.NewPoint(res.Location.Lat, res.Location.Lng)
-	return point, nil
+	return &Point{Lat: res.Location.Lat, Lng: res.Location.Lng}, nil
 }
 
 // This struct contains selected fields from Google's Geocoding Service response
@@ -46,23 +43,22 @@ type geolocateResponse struct {
 	}
 }
 
-func request(apiKey string) ([]byte, error) {
-	client := &http.Client{}
-
-	dst := "https://www.googleapis.com/geolocation/v1/geolocate?key=" + apiKey
-
+func (g *GoogleGeo) geolocateRequest() ([]byte, error) {
+	dst := "https://www.googleapis.com/geolocation/v1/geolocate?key=" + g.apiKey
 	form := url.Values{}
 	// form.Add("considerIp", "true")
 
-	req, _ := http.NewRequest("POST", dst, strings.NewReader(form.Encode()))
-	resp, requestErr := client.Do(req)
+	req, err := http.NewRequest("POST", dst, strings.NewReader(form.Encode()))
+	if err != nil {
+		return nil, err
+	}
 
+	resp, requestErr := g.client.Do(req)
 	if requestErr != nil {
 		return nil, requestErr
 	}
 
 	data, dataReadErr := ioutil.ReadAll(resp.Body)
-
 	if dataReadErr != nil {
 		return nil, dataReadErr
 	}
