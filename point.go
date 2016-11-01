@@ -4,15 +4,20 @@ import "math"
 
 // Point represents a Physical Point in geographic notation [lat, lng]
 type Point struct {
-	Address string
 	Lat     float64
 	Lng     float64
+	Address string
 }
 
 const (
 	// EarthRadius is about 6,371km according to Wikipedia
 	EarthRadius = 6371
 )
+
+// NewPoint returns a new Point
+func NewPoint(lat, lng float64) *Point {
+	return &Point{Lat: lat, Lng: lng}
+}
 
 // PointAtDistanceAndBearing returns a Point populated with the lat and lng coordinates
 // by transposing the origin point the passed in distance (in kilometers)
