@@ -11,7 +11,7 @@ func ExampleGeocode() {
 	client := NewGoogleGeo("")
 	res, _ := client.Geocode("New York City")
 	fmt.Println(res)
-	// Output: &{New York, NY, USA 40.7127837 -74.0059413}
+	// Output: &{40.7127837 -74.0059413 New York, NY, USA}
 }
 
 func ExampleReverseGeocode() {
