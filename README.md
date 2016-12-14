@@ -1,6 +1,7 @@
 # About
 
 [![GoDoc](https://godoc.org/github.com/martinlindhe/google-geolocate?status.svg)](https://godoc.org/github.com/martinlindhe/google-geolocate)
+[![Travis-CI](https://api.travis-ci.org/martinlindhe/google-geolocate.svg)](https://travis-ci.org/martinlindhe/google-geolocate)
 
 Golang client for the Google Maps Geocode and Geolocation API:s
 
@@ -18,7 +19,7 @@ client := geo.NewGoogleGeo("api-key")
 ```go
 res, _ := client.Geocode("New York City")
 fmt.Println(res)
-// Output: &{New York, NY, USA 40.7127837 -74.0059413}
+// Output: &{40.7127837 -74.0059413 New York, NY, USA}
 ```
 
 ## Reverse geocode
