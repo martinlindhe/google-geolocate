@@ -18,11 +18,10 @@ type GoogleGeo struct {
 
 // NewGoogleGeo returns a new GoogleGeo instance
 func NewGoogleGeo(apiKey string) *GoogleGeo {
-	g := GoogleGeo{
+	return &GoogleGeo{
 		client: &http.Client{},
 		apiKey: apiKey,
 	}
-	return &g
 }
 
 // This struct contains selected fields from Google's Geocoding Service response
