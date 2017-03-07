@@ -22,5 +22,5 @@ func TestGeolocateNoKey(t *testing.T) {
 	if point != nil {
 		t.Error("unexpected result")
 	}
-	assert.Equal(t, "usageLimits.keyInvalid.Bad Request", err.Error())
+	assert.Equal(t, "Google API key not provided", err.Error())
 }

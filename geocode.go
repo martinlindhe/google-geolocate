@@ -37,10 +37,21 @@ type googleGeocodeResponse struct {
 	}
 }
 
-type googleReverseGeocodeResponse struct {
-	Results []struct {
-		FormattedAddress string `json:"formatted_address"`
-	}
+// GoogleReverseGeocodeResponse is the return format of a reverse geocode response
+type GoogleReverseGeocodeResponse struct {
+	Results []reverseGeocodeResult
+}
+
+type reverseGeocodeResult struct {
+	AddressComponents []reverseGeocodeAddressComponent `json:"address_components"`
+	FormattedAddress  string                           `json:"formatted_address"`
+	Types             []string                         `json:"types"`
+}
+
+type reverseGeocodeAddressComponent struct {
+	LongName  string   `json:"long_name"`
+	ShortName string   `json:"short_name"`
+	Types     []string `json:"types"`
 }
 
 // This is the error that consumers receive when there
@@ -82,23 +93,32 @@ func (g *GoogleGeo) Geocode(address string) (*Point, error) {
 // ReverseGeocode geocodes the pointer to a Point struct and returns the first address that matches
 // or returns an error if the underlying request cannot complete.
 func (g *GoogleGeo) ReverseGeocode(p *Point) (string, error) {
-	queryStr, err := g.reverseGeocodeQueryStr(p)
+	res, err := g.ReverseGeocodeDetailed(p)
 	if err != nil {
 		return "", err
+	}
+	return res.Results[0].FormattedAddress, err
+}
+
+// ReverseGeocodeDetailed geocodes the pointer to a Point struct and returns detailed address information.
+func (g *GoogleGeo) ReverseGeocodeDetailed(p *Point) (*GoogleReverseGeocodeResponse, error) {
+	queryStr, err := g.reverseGeocodeQueryStr(p)
+	if err != nil {
+		return nil, err
 	}
 	data, err := g.request(queryStr)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	res := &googleReverseGeocodeResponse{}
+	res := &GoogleReverseGeocodeResponse{}
 	err = json.Unmarshal(data, res)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if len(res.Results) == 0 {
-		return "", errGoogleZeroResults
+		return nil, errGoogleZeroResults
 	}
-	return res.Results[0].FormattedAddress, err
+	return res, nil
 }
 
 // request issues a request to the google geocoding service and forwards the passed in params string
@@ -144,4 +164,49 @@ func (g *GoogleGeo) reverseGeocodeQueryStr(p *Point) (string, error) {
 		return "", err
 	}
 	return queryStr.String(), nil
+}
+
+// DetailsToAddress parses a result into an Address object
+func DetailsToAddress(det *reverseGeocodeResult) *Address {
+	adr := Address{}
+
+	for _, d := range det.AddressComponents {
+		for _, t := range d.Types {
+			switch t {
+			case "street_number":
+				adr.StreetNumber = d.LongName
+			case "locality":
+				adr.Locality = d.LongName
+			case "sublocality":
+				adr.Sublocality = d.LongName
+			case "country":
+				adr.Country = d.LongName
+			case "postal_code":
+				adr.PostalCode = d.LongName
+			case "neighborhood":
+				adr.Neighborhood = d.LongName
+			case "administrative_area_level_1":
+				adr.AdministrativeAreaLevel1 = d.LongName
+			case "administrative_area_level_2":
+				adr.AdministrativeAreaLevel2 = d.LongName
+			default:
+				//log.Println("unknown type", t)
+			}
+		}
+	}
+
+	return &adr
+}
+
+// Address holds a parsed address result
+type Address struct {
+	StreetNumber             string
+	Locality                 string
+	Sublocality              string
+	Neighborhood             string
+	Route                    string
+	PostalCode               string
+	Country                  string
+	AdministrativeAreaLevel1 string
+	AdministrativeAreaLevel2 string
 }

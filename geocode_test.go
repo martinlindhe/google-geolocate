@@ -22,6 +22,16 @@ func ExampleReverseGeocode() {
 	// Output: New York City Hall, New York, NY 10007, USA
 }
 
+func ExampleReverseGeocodeDetailed() {
+	client := NewGoogleGeo("")
+	p := Point{Lat: 40.7127837, Lng: -74.0059413}
+	res, _ := client.ReverseGeocodeDetailed(&p)
+
+	address := DetailsToAddress(&res.Results[0])
+	fmt.Printf("%#v", address)
+	// Output: &geolocate.Address{StreetNumber:"", Locality:"New York", Sublocality:"Manhattan", Neighborhood:"Lower Manhattan", Route:"", PostalCode:"10007", Country:"United States", AdministrativeAreaLevel1:"New York", AdministrativeAreaLevel2:"New York County"}
+}
+
 func TestGoogleGeocoder(t *testing.T) {
 	// Empty API Key
 	c := NewGoogleGeo("")
