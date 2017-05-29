@@ -14,6 +14,7 @@ import (
 type GoogleGeo struct {
 	client *http.Client
 	apiKey string
+	region string
 }
 
 // NewGoogleGeo returns a new GoogleGeo instance
@@ -63,6 +64,12 @@ func (g *GoogleGeo) SetGoogleAPIKey(newAPIKey string) {
 	g.apiKey = newAPIKey
 }
 
+// SetRegion sets an optional region that will be used for the geocode requests.
+// See https://developers.google.com/maps/documentation/geocoding/intro#RegionCodes
+func (g *GoogleGeo) SetRegion(region string) {
+	g.region = region
+}
+
 // Geocode geocodes the passed in query string and returns a pointer to a new Point struct.
 // Returns an error if the underlying request cannot complete.
 func (g *GoogleGeo) Geocode(address string) (*Point, error) {
@@ -75,7 +82,9 @@ func (g *GoogleGeo) Geocode(address string) (*Point, error) {
 		return nil, err
 	}
 	res := &googleGeocodeResponse{}
-	json.Unmarshal(data, res)
+	if err := json.Unmarshal(data, res); err != nil {
+		return nil, err
+	}
 	if len(res.Results) == 0 {
 		return nil, errGoogleZeroResults
 	}
@@ -129,8 +138,16 @@ func (g *GoogleGeo) request(params string) ([]byte, error) {
 		g.client = &http.Client{}
 	}
 
-	fullURL := "https://maps.googleapis.com/maps/api/geocode/json?sensor=false&" + params
-	req, _ := http.NewRequest("GET", fullURL, nil)
+	baseURL := "https://maps.googleapis.com/maps/api/geocode/json?sensor=false&"
+	if g.region != "" {
+		baseURL += "region=" + g.region + "&"
+	}
+
+	fullURL := baseURL + params
+	req, err := http.NewRequest("GET", fullURL, nil)
+	if err != nil {
+		return nil, err
+	}
 	resp, requestErr := g.client.Do(req)
 	if requestErr != nil {
 		return nil, requestErr
