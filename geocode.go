@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 // GoogleGeo contains all the functionality of interacting with the Google Maps Geocoding Service
@@ -19,7 +20,7 @@ type GoogleGeo struct {
 // NewGoogleGeo returns a new GoogleGeo instance
 func NewGoogleGeo(apiKey string) *GoogleGeo {
 	return &GoogleGeo{
-		client: &http.Client{},
+		client: &http.Client{Timeout: time.Second * 10},
 		apiKey: apiKey,
 	}
 }
