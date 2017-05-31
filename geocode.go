@@ -65,16 +65,21 @@ func (g *GoogleGeo) SetGoogleAPIKey(newAPIKey string) {
 	g.apiKey = newAPIKey
 }
 
-// SetRegion sets an optional region that will be used for the geocode requests.
-// See https://developers.google.com/maps/documentation/geocoding/intro#RegionCodes
-func (g *GoogleGeo) SetRegion(region string) {
-	g.region = region
+// GeocodeWithRegion geocodes the passed in query string and returns a pointer to a new Point struct.
+// Returns an error if the underlying request cannot complete.
+// Read about region usage here: https://developers.google.com/maps/documentation/geocoding/intro#RegionCodes
+func (g *GoogleGeo) GeocodeWithRegion(address, region string) (*Point, error) {
+	return g.geocode(address, region)
 }
 
 // Geocode geocodes the passed in query string and returns a pointer to a new Point struct.
 // Returns an error if the underlying request cannot complete.
 func (g *GoogleGeo) Geocode(address string) (*Point, error) {
-	queryStr, err := g.geocodeQueryStr(address)
+	return g.geocode(address, "")
+}
+
+func (g *GoogleGeo) geocode(address, region string) (*Point, error) {
+	queryStr, err := g.geocodeQueryStr(address, region)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +141,7 @@ func (g *GoogleGeo) ReverseGeocodeDetailed(p *Point) (*GoogleReverseGeocodeRespo
 // Note: Since this is an arbitrary request, you are responsible for passing in your API key if you want one.
 func (g *GoogleGeo) request(params string) ([]byte, error) {
 	if g.client == nil {
-		g.client = &http.Client{}
+		g.client = &http.Client{Timeout: time.Second * 10}
 	}
 
 	baseURL := "https://maps.googleapis.com/maps/api/geocode/json?sensor=false&"
@@ -161,11 +166,16 @@ func (g *GoogleGeo) request(params string) ([]byte, error) {
 	return data, nil
 }
 
-func (g *GoogleGeo) geocodeQueryStr(address string) (string, error) {
+func (g *GoogleGeo) geocodeQueryStr(address, region string) (string, error) {
 	safeQuery := url.QueryEscape(address)
 	var queryStr = bytes.NewBufferString("")
 	if _, err := queryStr.WriteString(fmt.Sprintf("address=%s", safeQuery)); err != nil {
 		return "", err
+	}
+	if region != "" {
+		if _, err := queryStr.WriteString(fmt.Sprintf("&region=%s", region)); err != nil {
+			return "", err
+		}
 	}
 	if _, err := queryStr.WriteString(fmt.Sprintf("&key=%s", g.apiKey)); err != nil {
 		return "", err
