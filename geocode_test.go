@@ -14,6 +14,16 @@ func ExampleGeocode() {
 	// Output: &{40.7127837 -74.0059413 New York, NY, USA}
 }
 
+func ExampleGeocodeWithRegion() {
+	client := NewGoogleGeo("")
+	res, _ := client.Geocode("Toledo")
+	fmt.Println(res)
+	res, _ = client.GeocodeWithRegion("Toledo", "es")
+	fmt.Println(res)
+	// Output: &{41.6639383 -83.55521200000001 Toledo, OH, USA}
+	// &{39.8628316 -4.027323099999999 Toledo, Spain}
+}
+
 func ExampleReverseGeocode() {
 	client := NewGoogleGeo("")
 	p := Point{Lat: 40.7127837, Lng: -74.0059413}
@@ -47,7 +57,7 @@ func TestGoogleGeocoderQueryStr(t *testing.T) {
 	c := NewGoogleGeo("")
 
 	address := "123 fake st"
-	res, err := c.geocodeQueryStr(address)
+	res, err := c.geocodeQueryStr(address, "")
 	if err != nil {
 		t.Errorf("Error creating query string: %v", err)
 	}
@@ -57,9 +67,19 @@ func TestGoogleGeocoderQueryStr(t *testing.T) {
 		t.Errorf(fmt.Sprintf("Mismatched query string.  Expected: %s.  Actual: %s", expected, res))
 	}
 
+	res, err = c.geocodeQueryStr(address, "se")
+	if err != nil {
+		t.Errorf("Error creating query string: %v", err)
+	}
+
+	expected = "address=123+fake+st&region=se&key="
+	if res != expected {
+		t.Errorf(fmt.Sprintf("Mismatched query string.  Expected: %s.  Actual: %s", expected, res))
+	}
+
 	// Set api key to some value
 	c.SetGoogleAPIKey("foo")
-	res, err = c.geocodeQueryStr(address)
+	res, err = c.geocodeQueryStr(address, "")
 	if err != nil {
 		t.Errorf("Error creating query string: %v", err)
 	}
