@@ -3,10 +3,14 @@ package geolocate
 import "math"
 
 // Point represents a Physical Point in geographic notation [lat, lng]
+// The different possible LocationTypes are documented here:
+// https://developers.google.com/maps/documentation/geocoding/intro#Results
+// It can for example be "ROOFTOP".
 type Point struct {
-	Lat     float64
-	Lng     float64
-	Address string
+	Lat          float64
+	Lng          float64
+	Address      string
+	LocationType string
 }
 
 const (
