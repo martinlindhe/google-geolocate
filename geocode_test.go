@@ -11,7 +11,7 @@ func ExampleGeocode() {
 	client := NewGoogleGeo("")
 	res, _ := client.Geocode("New York City")
 	fmt.Println(res)
-	// Output: &{40.7127837 -74.0059413 New York, NY, USA}
+	// Output: &{40.7127837 -74.0059413 New York, NY, USA APPROXIMATE}
 }
 
 func ExampleGeocodeWithRegion() {
@@ -20,8 +20,8 @@ func ExampleGeocodeWithRegion() {
 	fmt.Println(res)
 	res, _ = client.GeocodeWithRegion("Toledo", "es")
 	fmt.Println(res)
-	// Output: &{41.6639383 -83.55521200000001 Toledo, OH, USA}
-	// &{39.8628316 -4.027323099999999 Toledo, Spain}
+	// Output: &{41.6639383 -83.55521200000001 Toledo, OH, USA APPROXIMATE}
+	// &{39.8628316 -4.027323099999999 Toledo, Spain APPROXIMATE}
 }
 
 func ExampleReverseGeocode() {

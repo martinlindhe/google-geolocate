@@ -35,6 +35,7 @@ type googleGeocodeResponse struct {
 				Lat float64
 				Lng float64
 			}
+			LocationType string `json:"location_type"`
 		}
 	}
 }
@@ -97,10 +98,12 @@ func (g *GoogleGeo) geocode(address, region string) (*Point, error) {
 
 	lat := res.Results[0].Geometry.Location.Lat
 	lng := res.Results[0].Geometry.Location.Lng
+	loc := res.Results[0].Geometry.LocationType
 	point := &Point{
-		Address: res.Results[0].FormattedAddress,
-		Lat:     lat,
-		Lng:     lng,
+		Address:      res.Results[0].FormattedAddress,
+		Lat:          lat,
+		Lng:          lng,
+		LocationType: loc,
 	}
 	return point, nil
 }
@@ -126,8 +129,7 @@ func (g *GoogleGeo) ReverseGeocodeDetailed(p *Point) (*GoogleReverseGeocodeRespo
 		return nil, err
 	}
 	res := &GoogleReverseGeocodeResponse{}
-	err = json.Unmarshal(data, res)
-	if err != nil {
+	if err := json.Unmarshal(data, res); err != nil {
 		return nil, err
 	}
 	if len(res.Results) == 0 {
