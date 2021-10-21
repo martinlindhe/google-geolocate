@@ -1,7 +1,6 @@
 # About
 
 [![GoDoc](https://godoc.org/github.com/martinlindhe/google-geolocate?status.svg)](https://godoc.org/github.com/martinlindhe/google-geolocate)
-[![Travis-CI](https://api.travis-ci.org/martinlindhe/google-geolocate.svg)](https://travis-ci.org/martinlindhe/google-geolocate)
 
 Golang client for the Google Maps Geocode and Geolocation API:s
 

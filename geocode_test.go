@@ -47,7 +47,7 @@ func TestGoogleGeocoder(t *testing.T) {
 	c := NewGoogleGeo("")
 
 	res, err := c.Geocode("Mora, Sweden")
-	assert.Equal(t, nil, err)
+	assert.Nil(t, err)
 	assert.Equal(t, "Mora, Sweden", res.Address)
 }
 

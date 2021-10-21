@@ -81,9 +81,9 @@ func (p *Point) BearingTo(p2 *Point) float64 {
 	y := math.Sin(dLon) * math.Cos(lat2)
 	x := math.Cos(lat1)*math.Sin(lat2) -
 		math.Sin(lat1)*math.Cos(lat2)*math.Cos(dLon)
-	brng := math.Atan2(y, x) * 180.0 / math.Pi
+	bearing := math.Atan2(y, x) * 180.0 / math.Pi
 
-	return brng
+	return bearing
 }
 
 // MidpointTo calculates the midpoint between point `p` and the supplied point.
